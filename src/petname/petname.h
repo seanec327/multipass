@@ -23,40 +23,20 @@
 #include <multipass/name_generator.h>
 
 #include <random>
-#include <string>
-#include <vector>
 
 namespace multipass
 {
+
 class Petname final : public NameGenerator
 {
 public:
-    enum class NumWords
-    {
-        ONE,
-        TWO,
-        THREE
-    };
-
-    /// Constructs an instance that will generate names using
-    /// the requested separator and the requested number of words
-    Petname(NumWords num_words, std::string separator);
-    /// Constructs an instance that will generate names using
-    /// a default separator of "-" and the requested number of words
-    explicit Petname(NumWords num_words);
-    /// Constructs an instance that will generate names using
-    /// the requested separator and two words
-    explicit Petname(std::string separator);
-
+    Petname();
     std::string make_name() override;
 
 private:
-    std::string separator;
-    NumWords num_words;
     std::mt19937 engine;
     std::uniform_int_distribution<std::size_t> name_dist;
     std::uniform_int_distribution<std::size_t> adjective_dist;
-    std::uniform_int_distribution<std::size_t> adverb_dist;
 };
-}
+} // namespace multipass
 #endif // MULTIPASS_PETNAME_H

@@ -24,5 +24,5 @@ namespace mp = multipass;
 
 mp::NameGenerator::UPtr mp::make_default_name_generator()
 {
-    return std::make_unique<mp::Petname>(mp::Petname::NumWords::TWO, "-");
+    return std::make_unique<mp::Petname>();
 }
