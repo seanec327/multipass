@@ -43,4 +43,12 @@ private:
     KeyCertificatePair key_cert_pair;
 };
 } // namespace multipass
+
+// used by Flutter through Dart FFI
+extern "C" struct KeyCertificatePair
+{
+    const char* pem_cert;
+    const char* pem_cert_key;
+};
+
 #endif // MULTIPASS_SSL_CERT_PROVIDER_H

@@ -294,3 +294,26 @@ catch (...)
     return nullptr;
 }
 
+extern "C" struct KeyCertificatePair get_cert_pair()
+try
+{
+
+    auto cert_provider = mp::client::get_cert_provider(mp::client::get_server_address());
+    auto cert = cert_provider->PEM_certificate();
+    auto key = cert_provider->PEM_signing_key();
+    struct KeyCertificatePair pair
+    {
+        .pem_cert = strdup(cert.c_str()), .pem_cert_key = strdup(key.c_str()),
+    };
+    return pair;
+}
+catch (const std::exception& e)
+{
+    mpl::log(mpl::Level::error, "client", fmt::format("failed getting certificate pair: {}", e.what()));
+    return KeyCertificatePair{nullptr, nullptr};
+}
+catch (...)
+{
+    mpl::log(mpl::Level::error, "client", "failed getting certificate pair");
+    return KeyCertificatePair{nullptr, nullptr};
+}

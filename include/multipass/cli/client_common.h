@@ -79,5 +79,6 @@ void post_setup();
 
 // used by Flutter through Dart FFI
 extern "C" const char* get_server_address();
+extern "C" struct KeyCertificatePair get_cert_pair();
 
 #endif // MULTIPASS_CLIENT_COMMON_H
