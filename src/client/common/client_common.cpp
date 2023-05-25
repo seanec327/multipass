@@ -290,3 +290,21 @@ void mp::client::post_setup()
 {
     platform::sync_winterm_profiles();
 }
+
+extern "C" const char* get_server_address()
+try
+{
+    const auto address = mp::client::get_server_address();
+    return strdup(address.c_str());
+}
+catch (const std::exception& e)
+{
+    mpl::log(mpl::Level::error, "client", fmt::format("failed getting server address: {}", e.what()));
+    return nullptr;
+}
+catch (...)
+{
+    mpl::log(mpl::Level::error, "client", "failed getting server address");
+    return nullptr;
+}
+

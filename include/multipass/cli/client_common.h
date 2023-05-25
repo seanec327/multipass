@@ -61,19 +61,23 @@ void handle_password(grpc::ClientReaderWriterInterface<Request, Reply>* client, 
     request.set_password(MP_CLIENT_PLATFORM.get_password(term));
     client->Write(request);
 }
-}
+} // namespace cmd
 
 namespace client
 {
 QString persistent_settings_filename();
 void register_global_settings_handlers();
-std::shared_ptr<grpc::Channel> make_channel(const std::string& server_address, CertProvider* cert_provider);
+std::shared_ptr<grpc::Channel> make_channel(const std::string& server_address, const CertProvider& cert_provider);
 std::string get_server_address();
 std::unique_ptr<SSLCertProvider> get_cert_provider();
 void set_logger();
 void set_logger(multipass::logging::Level verbosity); // full param qualification makes sure msvc is happy
 void pre_setup();
 void post_setup();
-}
+} // namespace client
 } // namespace multipass
+
+// used by Flutter through Dart FFI
+extern "C" const char* get_server_address();
+
 #endif // MULTIPASS_CLIENT_COMMON_H

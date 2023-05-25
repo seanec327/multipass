@@ -19,7 +19,7 @@ include_directories(
 add_definitions(
   -DXZ_USE_CRC64)
 
-add_library(xz-embedded STATIC
+add_library(xz-embedded SHARED
   xz-embedded/linux/lib/xz/xz_crc32.c
   xz-embedded/linux/lib/xz/xz_crc64.c
   xz-embedded/linux/lib/xz/xz_dec_lzma2.c
@@ -28,3 +28,5 @@ add_library(xz-embedded STATIC
 
 target_include_directories(xz-embedded INTERFACE
   xz-embedded/linux/include/linux)
+
+install(TARGETS xz-embedded LIBRARY COMPONENT multipassd)

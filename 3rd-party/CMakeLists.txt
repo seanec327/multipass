@@ -80,12 +80,18 @@ if (NOT MSVC)
 endif ()
 
 # YAML C++
+
+# build shared library. needs to be defined globally, hence CACHE INTERNAL
+set(YAML_BUILD_SHARED_LIBS ON CACHE INTERNAL "yaml-cpp build shared libs")
+
 # Disable tests here to avoid double-including gtest
 option(YAML_CPP_BUILD_TOOLS OFF)
 option(YAML_CPP_BUILD_CONTRIB OFF)
 option(YAML_CPP_BUILD_TESTS OFF)
 
 add_subdirectory(yaml-cpp EXCLUDE_FROM_ALL)
+
+install(TARGETS yaml-cpp LIBRARY COMPONENT multipassd)
 
 add_library(yaml INTERFACE)
 
@@ -117,10 +123,12 @@ target_compile_definitions(scope_guard INTERFACE
   SG_REQUIRE_NOEXCEPT_IN_CPP17)
 
 # semver library
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS ON)
 add_subdirectory(semver EXCLUDE_FROM_ALL)
 target_include_directories(semver INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/semver/include)
+
+install(TARGETS semver LIBRARY COMPONENT multipass)
 
 # xz-decoder config
 add_subdirectory(xz-decoder EXCLUDE_FROM_ALL)

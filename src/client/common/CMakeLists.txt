@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-add_library(client_common STATIC
+add_library(client_common SHARED
   alias_dict.cpp
   client_common.cpp
   prompters.cpp)
@@ -24,3 +24,5 @@ target_link_libraries(client_common
   rpc
   settings
   Qt5::Core)
+
+install(TARGETS client_common LIBRARY COMPONENT multipass)
