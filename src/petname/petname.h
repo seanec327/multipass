@@ -39,4 +39,8 @@ private:
     std::uniform_int_distribution<std::size_t> adjective_dist;
 };
 } // namespace multipass
+
+// used by Flutter through Dart FFI
+extern "C" const char* generate_petname();
+
 #endif // MULTIPASS_PETNAME_H

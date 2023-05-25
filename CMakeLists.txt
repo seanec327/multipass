@@ -168,6 +168,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE) # generate auxiliary files for shared libraries
   add_definitions(-DMULTIPASS_COMPILER_MSVC)
   add_definitions(-D_WIN32_WINNT=0xA00) # A gprc header requires this (specifies Windows 10)
   add_definitions(-DNOMINMAX) # otherwise windows defines macros which interfere with std::min, std::max

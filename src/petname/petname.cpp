@@ -40,3 +40,10 @@ std::string mp::Petname::make_name()
 {
     return std::string{petname::adjectives[adjective_dist(engine)]} + '-' + petname::names[name_dist(engine)];
 }
+
+extern "C" const char* generate_petname()
+{
+    static mp::Petname generator{};
+    const auto name = generator.make_name();
+    return strdup(name.c_str());
+}
