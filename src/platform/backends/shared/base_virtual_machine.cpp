@@ -559,6 +559,11 @@ void BaseVirtualMachine::load_snapshots()
     load_generic_snapshot_info();
 }
 
+void BaseVirtualMachine::clone_snapshots(const VirtualMachine& src_vm)
+{
+    //    auto snapshots = src_vm.view_snapshots();
+}
+
 std::vector<std::string> BaseVirtualMachine::get_childrens_names(const Snapshot* parent) const
 {
     require_snapshots_support();
