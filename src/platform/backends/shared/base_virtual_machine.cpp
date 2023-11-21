@@ -766,4 +766,12 @@ void BaseVirtualMachine::drop_ssh_session()
         ssh_session.reset();
     }
 }
+std::shared_ptr<Snapshot> BaseVirtualMachine::make_specific_snapshot(const QString& filename,
+                                                                     const VMSpecs& src_specs,
+                                                                     const VMSpecs& dest_specs,
+                                                                     const std::string& src_vm_name)
+{
+    throw NotImplementedOnThisBackendException{"Snapshots"};
+}
+
 } // namespace multipass
