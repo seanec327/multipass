@@ -139,25 +139,22 @@ std::optional<mp::SSHSession> wait_until_ssh_up_helper(mp::VirtualMachine* virtu
 }
 } // namespace
 
-namespace multipass
-{
-
-BaseVirtualMachine::BaseVirtualMachine(VirtualMachine::State state,
-                                       const std::string& vm_name,
-                                       const SSHKeyProvider& key_provider,
-                                       const Path& instance_dir)
+mp::BaseVirtualMachine::BaseVirtualMachine(VirtualMachine::State state,
+                                           const std::string& vm_name,
+                                           const SSHKeyProvider& key_provider,
+                                           const Path& instance_dir)
     : VirtualMachine{state, vm_name, instance_dir}, key_provider{key_provider}
 {
 }
 
-BaseVirtualMachine::BaseVirtualMachine(const std::string& vm_name,
-                                       const SSHKeyProvider& key_provider,
-                                       const Path& instance_dir)
+mp::BaseVirtualMachine::BaseVirtualMachine(const std::string& vm_name,
+                                           const SSHKeyProvider& key_provider,
+                                           const Path& instance_dir)
     : VirtualMachine{vm_name, instance_dir}, key_provider{key_provider}
 {
 }
 
-void BaseVirtualMachine::apply_extra_interfaces_and_instance_id_to_cloud_init(
+void mp::BaseVirtualMachine::apply_extra_interfaces_and_instance_id_to_cloud_init(
     const std::string& default_mac_addr,
     const std::vector<NetworkInterface>& extra_interfaces,
     const std::string& new_instance_id) const
@@ -171,8 +168,8 @@ void BaseVirtualMachine::apply_extra_interfaces_and_instance_id_to_cloud_init(
                                                                                   cloud_init_config_iso_file_path);
 }
 
-void BaseVirtualMachine::add_extra_interface_to_instance_cloud_init(const std::string& default_mac_addr,
-                                                                    const NetworkInterface& extra_interface) const
+void mp::BaseVirtualMachine::add_extra_interface_to_instance_cloud_init(const std::string& default_mac_addr,
+                                                                        const NetworkInterface& extra_interface) const
 {
     const std::filesystem::path cloud_init_config_iso_file_path =
         std::filesystem::path{instance_dir.absolutePath().toStdString()} / "cloud-init-config.iso";
@@ -182,7 +179,7 @@ void BaseVirtualMachine::add_extra_interface_to_instance_cloud_init(const std::s
                                                              cloud_init_config_iso_file_path);
 }
 
-std::string BaseVirtualMachine::get_instance_id_from_the_cloud_init() const
+std::string mp::BaseVirtualMachine::get_instance_id_from_the_cloud_init() const
 {
     const std::filesystem::path cloud_init_config_iso_file_path =
         std::filesystem::path{instance_dir.absolutePath().toStdString()} / "cloud-init-config.iso";
@@ -190,7 +187,7 @@ std::string BaseVirtualMachine::get_instance_id_from_the_cloud_init() const
     return MP_CLOUD_INIT_FILE_OPS.get_instance_id_from_cloud_init(cloud_init_config_iso_file_path);
 }
 
-std::string BaseVirtualMachine::ssh_exec(const std::string& cmd)
+std::string mp::BaseVirtualMachine::ssh_exec(const std::string& cmd)
 {
     const std::unique_lock lock{state_mutex};
 
@@ -227,7 +224,7 @@ std::string BaseVirtualMachine::ssh_exec(const std::string& cmd)
     assert(false && "we should never reach here");
 }
 
-void BaseVirtualMachine::renew_ssh_session()
+void mp::BaseVirtualMachine::renew_ssh_session()
 {
     if (!MP_UTILS.is_running(current_state())) // spend time updating state only if we need a new session
         throw SSHException{fmt::format("SSH unavailable on instance {}: not running", vm_name)};
@@ -239,14 +236,14 @@ void BaseVirtualMachine::renew_ssh_session()
     ssh_session.emplace(ssh_hostname(), ssh_port(), ssh_username(), key_provider);
 }
 
-void BaseVirtualMachine::wait_until_ssh_up(std::chrono::milliseconds timeout)
+void mp::BaseVirtualMachine::wait_until_ssh_up(std::chrono::milliseconds timeout)
 {
     drop_ssh_session();
     ssh_session = wait_until_ssh_up_helper(this, timeout, key_provider);
     mpl::log(logging::Level::debug, vm_name, "Caching initial SSH session");
 }
 
-void BaseVirtualMachine::wait_for_cloud_init(std::chrono::milliseconds timeout)
+void mp::BaseVirtualMachine::wait_for_cloud_init(std::chrono::milliseconds timeout)
 {
     auto action = [this] {
         ensure_vm_is_running();
@@ -270,7 +267,7 @@ void BaseVirtualMachine::wait_for_cloud_init(std::chrono::milliseconds timeout)
     mp::utils::try_action_for(on_timeout, timeout, action);
 }
 
-std::vector<std::string> BaseVirtualMachine::get_all_ipv4()
+std::vector<std::string> mp::BaseVirtualMachine::get_all_ipv4()
 {
     std::vector<std::string> all_ipv4;
 
@@ -302,7 +299,7 @@ std::vector<std::string> BaseVirtualMachine::get_all_ipv4()
     return all_ipv4;
 }
 
-auto BaseVirtualMachine::view_snapshots() const -> SnapshotVista
+auto mp::BaseVirtualMachine::view_snapshots() const -> SnapshotVista
 {
     require_snapshots_support();
     SnapshotVista ret;
@@ -316,7 +313,7 @@ auto BaseVirtualMachine::view_snapshots() const -> SnapshotVista
     return ret;
 }
 
-std::shared_ptr<const Snapshot> BaseVirtualMachine::get_snapshot(const std::string& name) const
+std::shared_ptr<const mp::Snapshot> mp::BaseVirtualMachine::get_snapshot(const std::string& name) const
 {
     require_snapshots_support();
     const std::unique_lock lock{snapshot_mutex};
@@ -330,7 +327,7 @@ std::shared_ptr<const Snapshot> BaseVirtualMachine::get_snapshot(const std::stri
     }
 }
 
-std::shared_ptr<const Snapshot> BaseVirtualMachine::get_snapshot(int index) const
+std::shared_ptr<const mp::Snapshot> mp::BaseVirtualMachine::get_snapshot(int index) const
 {
     require_snapshots_support();
     const std::unique_lock lock{snapshot_mutex};
@@ -343,19 +340,19 @@ std::shared_ptr<const Snapshot> BaseVirtualMachine::get_snapshot(int index) cons
         fmt::format("No snapshot with given index in instance; instance name: {}; snapshot index: {}", vm_name, index)};
 }
 
-std::shared_ptr<Snapshot> BaseVirtualMachine::get_snapshot(const std::string& name)
+std::shared_ptr<mp::Snapshot> mp::BaseVirtualMachine::get_snapshot(const std::string& name)
 {
     return std::const_pointer_cast<Snapshot>(std::as_const(*this).get_snapshot(name));
 }
 
-std::shared_ptr<Snapshot> BaseVirtualMachine::get_snapshot(int index)
+std::shared_ptr<mp::Snapshot> mp::BaseVirtualMachine::get_snapshot(int index)
 {
     return std::const_pointer_cast<Snapshot>(std::as_const(*this).get_snapshot(index));
 }
 
-void BaseVirtualMachine::take_snapshot_rollback_helper(SnapshotMap::iterator it,
-                                                       std::shared_ptr<Snapshot>& old_head,
-                                                       int old_count)
+void mp::BaseVirtualMachine::take_snapshot_rollback_helper(SnapshotMap::iterator it,
+                                                           std::shared_ptr<Snapshot>& old_head,
+                                                           int old_count)
 {
     if (old_head != head_snapshot)
     {
@@ -374,7 +371,7 @@ void BaseVirtualMachine::take_snapshot_rollback_helper(SnapshotMap::iterator it,
     snapshots.erase(it);
 }
 
-auto BaseVirtualMachine::make_take_snapshot_rollback(SnapshotMap::iterator it)
+auto mp::BaseVirtualMachine::make_take_snapshot_rollback(SnapshotMap::iterator it)
 {
     return sg::make_scope_guard( // best effort to rollback
         [this, it = it, old_head = head_snapshot, old_count = snapshot_count]() mutable noexcept {
@@ -382,9 +379,9 @@ auto BaseVirtualMachine::make_take_snapshot_rollback(SnapshotMap::iterator it)
         });
 }
 
-std::shared_ptr<const Snapshot> BaseVirtualMachine::take_snapshot(const VMSpecs& specs,
-                                                                  const std::string& snapshot_name,
-                                                                  const std::string& comment)
+std::shared_ptr<const mp::Snapshot> mp::BaseVirtualMachine::take_snapshot(const VMSpecs& specs,
+                                                                          const std::string& snapshot_name,
+                                                                          const std::string& comment)
 {
     require_snapshots_support();
 
@@ -416,7 +413,7 @@ std::shared_ptr<const Snapshot> BaseVirtualMachine::take_snapshot(const VMSpecs&
     return ret;
 }
 
-bool BaseVirtualMachine::updated_deleted_head(std::shared_ptr<Snapshot>& snapshot, const Path& head_path)
+bool mp::BaseVirtualMachine::updated_deleted_head(std::shared_ptr<Snapshot>& snapshot, const Path& head_path)
 {
     if (head_snapshot == snapshot)
     {
@@ -428,16 +425,16 @@ bool BaseVirtualMachine::updated_deleted_head(std::shared_ptr<Snapshot>& snapsho
     return false;
 }
 
-auto BaseVirtualMachine::make_deleted_head_rollback(const Path& head_path, const bool& wrote_head)
+auto mp::BaseVirtualMachine::make_deleted_head_rollback(const Path& head_path, const bool& wrote_head)
 {
     return sg::make_scope_guard([this, old_head = head_snapshot, &head_path, &wrote_head]() mutable noexcept {
         deleted_head_rollback_helper(head_path, wrote_head, old_head);
     });
 }
 
-void BaseVirtualMachine::deleted_head_rollback_helper(const Path& head_path,
-                                                      const bool& wrote_head,
-                                                      std::shared_ptr<Snapshot>& old_head)
+void mp::BaseVirtualMachine::deleted_head_rollback_helper(const Path& head_path,
+                                                          const bool& wrote_head,
+                                                          std::shared_ptr<Snapshot>& old_head)
 {
     if (head_snapshot != old_head)
     {
@@ -451,15 +448,15 @@ void BaseVirtualMachine::deleted_head_rollback_helper(const Path& head_path,
     }
 }
 
-auto BaseVirtualMachine::make_parent_update_rollback(const std::shared_ptr<Snapshot>& deleted_parent,
-                                                     std::vector<Snapshot*>& updated_parents) const
+auto mp::BaseVirtualMachine::make_parent_update_rollback(const std::shared_ptr<Snapshot>& deleted_parent,
+                                                         std::vector<Snapshot*>& updated_parents) const
 {
     return sg::make_scope_guard([this, &updated_parents, deleted_parent]() noexcept {
         top_catch_all(vm_name, &update_parents_rollback_helper, deleted_parent, updated_parents);
     });
 }
 
-void BaseVirtualMachine::delete_snapshot_helper(std::shared_ptr<Snapshot>& snapshot)
+void mp::BaseVirtualMachine::delete_snapshot_helper(std::shared_ptr<Snapshot>& snapshot)
 {
     // Update head if deleted
     auto wrote_head = false;
@@ -480,8 +477,8 @@ void BaseVirtualMachine::delete_snapshot_helper(std::shared_ptr<Snapshot>& snaps
     rollback_head.dismiss();
 }
 
-void BaseVirtualMachine::update_parents(std::shared_ptr<Snapshot>& deleted_parent,
-                                        std::vector<Snapshot*>& updated_parents)
+void mp::BaseVirtualMachine::update_parents(std::shared_ptr<Snapshot>& deleted_parent,
+                                            std::vector<Snapshot*>& updated_parents)
 {
     auto new_parent = deleted_parent->get_parent();
     for (auto& [ignore, other] : snapshots)
@@ -495,7 +492,7 @@ void BaseVirtualMachine::update_parents(std::shared_ptr<Snapshot>& deleted_paren
 }
 
 template <typename NodeT>
-auto BaseVirtualMachine::make_reinsert_guard(NodeT& snapshot_node)
+auto mp::BaseVirtualMachine::make_reinsert_guard(NodeT& snapshot_node)
 {
     return sg::make_scope_guard([this, &snapshot_node]() noexcept {
         top_catch_all(vm_name, [this, &snapshot_node] {
@@ -509,7 +506,7 @@ auto BaseVirtualMachine::make_reinsert_guard(NodeT& snapshot_node)
     ;
 }
 
-void BaseVirtualMachine::rename_snapshot(const std::string& old_name, const std::string& new_name)
+void mp::BaseVirtualMachine::rename_snapshot(const std::string& old_name, const std::string& new_name)
 {
     if (old_name == new_name)
         return;
@@ -530,7 +527,7 @@ void BaseVirtualMachine::rename_snapshot(const std::string& old_name, const std:
     snapshot_node.mapped()->set_name(new_name);
 }
 
-void BaseVirtualMachine::delete_snapshot(const std::string& name)
+void mp::BaseVirtualMachine::delete_snapshot(const std::string& name)
 {
     const std::unique_lock lock{snapshot_mutex};
 
@@ -545,7 +542,7 @@ void BaseVirtualMachine::delete_snapshot(const std::string& name)
     mpl::log(mpl::Level::debug, vm_name, fmt::format("Snapshot deleted: {}", name));
 }
 
-void BaseVirtualMachine::load_snapshots()
+void mp::BaseVirtualMachine::load_snapshots()
 {
     const std::unique_lock lock{snapshot_mutex};
 
@@ -559,7 +556,7 @@ void BaseVirtualMachine::load_snapshots()
     load_generic_snapshot_info();
 }
 
-std::vector<std::string> BaseVirtualMachine::get_childrens_names(const Snapshot* parent) const
+std::vector<std::string> mp::BaseVirtualMachine::get_childrens_names(const Snapshot* parent) const
 {
     require_snapshots_support();
     std::vector<std::string> children;
@@ -571,7 +568,7 @@ std::vector<std::string> BaseVirtualMachine::get_childrens_names(const Snapshot*
     return children;
 }
 
-void BaseVirtualMachine::load_generic_snapshot_info()
+void mp::BaseVirtualMachine::load_generic_snapshot_info()
 {
     try
     {
@@ -588,7 +585,7 @@ void BaseVirtualMachine::load_generic_snapshot_info()
 }
 
 template <typename LockT>
-void BaseVirtualMachine::log_latest_snapshot(LockT lock) const
+void mp::BaseVirtualMachine::log_latest_snapshot(LockT lock) const
 {
     auto num_snapshots = static_cast<int>(snapshots.size());
     auto parent_name = head_snapshot->get_parents_name();
@@ -609,7 +606,7 @@ void BaseVirtualMachine::log_latest_snapshot(LockT lock) const
     }
 }
 
-void BaseVirtualMachine::load_snapshot(const QString& filename)
+void mp::BaseVirtualMachine::load_snapshot(const QString& filename)
 {
     auto snapshot = make_specific_snapshot(filename);
     const auto& name = snapshot->get_name();
@@ -622,19 +619,19 @@ void BaseVirtualMachine::load_snapshot(const QString& filename)
     }
 }
 
-auto BaseVirtualMachine::make_common_file_rollback(const Path& file_path,
-                                                   QFile& file,
-                                                   const std::string& old_contents) const
+auto mp::BaseVirtualMachine::make_common_file_rollback(const Path& file_path,
+                                                       QFile& file,
+                                                       const std::string& old_contents) const
 {
     return sg::make_scope_guard([this, &file_path, &file, old_contents, existed = file.exists()]() noexcept {
         common_file_rollback_helper(file_path, file, old_contents, existed);
     });
 }
 
-void BaseVirtualMachine::common_file_rollback_helper(const Path& file_path,
-                                                     QFile& file,
-                                                     const std::string& old_contents,
-                                                     bool existed) const
+void mp::BaseVirtualMachine::common_file_rollback_helper(const Path& file_path,
+                                                         QFile& file,
+                                                         const std::string& old_contents,
+                                                         bool existed) const
 {
     // best effort, ignore returns
     if (!existed)
@@ -645,7 +642,7 @@ void BaseVirtualMachine::common_file_rollback_helper(const Path& file_path,
         });
 }
 
-void BaseVirtualMachine::persist_generic_snapshot_info() const
+void mp::BaseVirtualMachine::persist_generic_snapshot_info() const
 {
     assert(head_snapshot);
 
@@ -666,18 +663,18 @@ void BaseVirtualMachine::persist_generic_snapshot_info() const
     head_file_rollback.dismiss();
 }
 
-void BaseVirtualMachine::persist_head_snapshot_index(const Path& head_path) const
+void mp::BaseVirtualMachine::persist_head_snapshot_index(const Path& head_path) const
 {
     auto head_index = head_snapshot ? head_snapshot->get_index() : 0;
     MP_UTILS.make_file_with_content(head_path.toStdString(), std::to_string(head_index) + "\n", yes_overwrite);
 }
 
-std::string BaseVirtualMachine::generate_snapshot_name() const
+std::string mp::BaseVirtualMachine::generate_snapshot_name() const
 {
     return fmt::format("snapshot{}", snapshot_count + 1);
 }
 
-auto BaseVirtualMachine::make_restore_rollback(const Path& head_path, VMSpecs& specs)
+auto mp::BaseVirtualMachine::make_restore_rollback(const Path& head_path, VMSpecs& specs)
 {
     return sg::make_scope_guard([this, &head_path, old_head = head_snapshot, old_specs = specs, &specs]() noexcept {
         top_catch_all(vm_name,
@@ -690,10 +687,10 @@ auto BaseVirtualMachine::make_restore_rollback(const Path& head_path, VMSpecs& s
     });
 }
 
-void BaseVirtualMachine::restore_rollback_helper(const Path& head_path,
-                                                 const std::shared_ptr<Snapshot>& old_head,
-                                                 const VMSpecs& old_specs,
-                                                 VMSpecs& specs)
+void mp::BaseVirtualMachine::restore_rollback_helper(const Path& head_path,
+                                                     const std::shared_ptr<Snapshot>& old_head,
+                                                     const VMSpecs& old_specs,
+                                                     VMSpecs& specs)
 {
     // best effort only
     specs = old_specs;
@@ -704,7 +701,7 @@ void BaseVirtualMachine::restore_rollback_helper(const Path& head_path,
     }
 }
 
-void BaseVirtualMachine::restore_snapshot(const std::string& name, VMSpecs& specs)
+void mp::BaseVirtualMachine::restore_snapshot(const std::string& name, VMSpecs& specs)
 {
     const std::unique_lock lock{snapshot_mutex};
 
@@ -744,21 +741,21 @@ void BaseVirtualMachine::restore_snapshot(const std::string& name, VMSpecs& spec
     rollback.dismiss();
 }
 
-std::shared_ptr<Snapshot> BaseVirtualMachine::make_specific_snapshot(const std::string& /*snapshot_name*/,
-                                                                     const std::string& /*comment*/,
-                                                                     const std::string& /*instance_id*/,
-                                                                     const VMSpecs& /*specs*/,
-                                                                     std::shared_ptr<Snapshot> /*parent*/)
+std::shared_ptr<mp::Snapshot> mp::BaseVirtualMachine::make_specific_snapshot(const std::string& /*snapshot_name*/,
+                                                                             const std::string& /*comment*/,
+                                                                             const std::string& /*instance_id*/,
+                                                                             const VMSpecs& /*specs*/,
+                                                                             std::shared_ptr<Snapshot> /*parent*/)
 {
     throw NotImplementedOnThisBackendException{"snapshots"};
 }
 
-std::shared_ptr<Snapshot> BaseVirtualMachine::make_specific_snapshot(const QString& /*filename*/)
+std::shared_ptr<mp::Snapshot> mp::BaseVirtualMachine::make_specific_snapshot(const QString& /*filename*/)
 {
     throw NotImplementedOnThisBackendException{"snapshots"};
 }
 
-void BaseVirtualMachine::drop_ssh_session()
+void mp::BaseVirtualMachine::drop_ssh_session()
 {
     if (ssh_session)
     {
@@ -766,5 +763,3 @@ void BaseVirtualMachine::drop_ssh_session()
         ssh_session.reset();
     }
 }
-
-} // namespace multipass
