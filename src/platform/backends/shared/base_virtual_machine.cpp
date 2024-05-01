@@ -628,7 +628,7 @@ void BaseVirtualMachine::load_snapshot_and_optionally_update_unique_identifiers(
 {
     const auto snapshot = make_specific_snapshot(file_path, std::forward<Args>(args)...);
     const auto& name = snapshot->get_name();
-    const auto [it, success] = snapshots.try_emplace(name, snapshot);
+    const auto [_, success] = snapshots.try_emplace(name, snapshot);
 
     if (!success)
     {
