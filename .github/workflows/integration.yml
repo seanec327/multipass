@@ -58,6 +58,13 @@ jobs:
 
     strategy:
       matrix: ${{ fromJSON(needs.GetMatrix.outputs.matrix) }}
+      exclude:
+      - os: Linux
+        vm: linux
+        driver: qemu
+      - os: Linux
+        vm: linux
+        driver: lxd
 
     env:
       TESTFLINGER_FILE: testflinger-${{ matrix.os }}-${{ matrix.driver }}.yaml
