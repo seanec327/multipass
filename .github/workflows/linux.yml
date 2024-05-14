@@ -302,8 +302,8 @@ jobs:
       with:
         token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
         workflow: Integration
-        ref: ${{ steps.dispatch-params.outputs.ref }}
-        sha: ${{ steps.dispatch-params.outputs.sha }}
+        ref: ${{ steps.dispatch-params.outputs.head_ref }}
+        sha: ${{ steps.dispatch-params.outputs.head_sha }}
         inputs: |
           {
             "snap-channel": "${{ needs.BuildAndTest.outputs.channel }}"
